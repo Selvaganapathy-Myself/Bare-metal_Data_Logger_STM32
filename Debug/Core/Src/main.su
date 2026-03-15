@@ -1,0 +1,11 @@
+main.c:10:6:I2C1_Init	4	static
+main.c:29:6:MPU6050_Write_Reg	16	static
+main.c:47:9:MPU6050_Read_Reg	24	static
+main.c:80:6:SPI1_Init	4	static
+main.c:100:9:SPI_TxRx	16	static
+main.c:110:6:W25Q_WriteEnable	8	static
+main.c:116:6:W25Q_Wait	8	static
+main.c:123:6:W25Q_SectorErase	16	static
+main.c:134:6:W25Q_WriteByte	16	static
+main.c:146:9:W25Q_ReadByte	24	static
+main.c:166:5:main	24	static
