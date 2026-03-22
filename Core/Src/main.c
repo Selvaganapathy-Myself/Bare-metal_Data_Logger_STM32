@@ -1,12 +1,10 @@
 #include "stm32f446xx.h"
 
-// --- Global Debug Variables ---
+
 volatile uint8_t flash_id = 0;
 volatile int16_t accel_x = 0;
 
-// ========================================================
-// 1. I2C DRIVER (MPU6050 on PB8, PB9)
-// ========================================================
+
 void I2C1_Init(void) {
     RCC->AHB1ENR |= (1 << 1);
     RCC->APB1ENR |= (1 << 21);
@@ -74,9 +72,7 @@ uint8_t MPU6050_Read_Reg(uint8_t reg_addr) {
     return data;
 }
 
-// ========================================================
-// 2. SPI DRIVER (W25Q128 on PA4, PA5, PA6, PA7)
-// ========================================================
+
 void SPI1_Init(void) {
     RCC->AHB1ENR |= (1 << 0);
     RCC->APB2ENR |= (1 << 12);
@@ -104,9 +100,8 @@ uint8_t SPI_TxRx(uint8_t data) {
     return SPI1->DR;
 }
 
-// ========================================================
-// 2.5 FLASH MEMORY COMMANDS (Put these above main!)
-// ========================================================
+
+
 void W25Q_WriteEnable(void) {
     GPIOA->ODR &= ~(1 << 4);
     SPI_TxRx(0x06);
@@ -155,10 +150,8 @@ uint8_t W25Q_ReadByte(uint32_t address) {
     return data;
 }
 
-// ========================================================
-// 3. THE BLACK BOX LOGGER (Main Program)
-// ========================================================
-// Global debug variables
+
+
 
 volatile int16_t current_accel_x = 0;
 volatile int16_t saved_accel_x = 0;
@@ -167,30 +160,30 @@ int main(void) {
     I2C1_Init();
     SPI1_Init();
 
-    // 1. Wake up MPU6050
+   
     MPU6050_Write_Reg(0x6B, 0x00);
 
-    // 2. Read live gravity data (X-Axis)
+   
     uint8_t x_high = MPU6050_Read_Reg(0x3B);
     uint8_t x_low = MPU6050_Read_Reg(0x3C);
     current_accel_x = (int16_t)((x_high << 8) | x_low);
 
-    // 3. Prepare the Flash Memory (Address 0x000000)
+  
     uint32_t start_address = 0x000000;
-    W25Q_SectorErase(start_address); // Always erase before writing!
+    W25Q_SectorErase(start_address); 
 
-    // 4. THE LOGGING EVENT: Save High Byte, then Low Byte
+   
     W25Q_WriteByte(start_address, x_high);
     W25Q_WriteByte(start_address + 1, x_low);
 
-    // 5. Read it back out of the physical flash memory!
+    
     uint8_t read_high = W25Q_ReadByte(start_address);
     uint8_t read_low = W25Q_ReadByte(start_address + 1);
 
-    // 6. Stitch it back together to prove it matches
+   
     saved_accel_x = (int16_t)((read_high << 8) | read_low);
 
     while(1) {
-        // Breakpoint goes here! We successfully logged the data and halted.
+      
     }
 }
